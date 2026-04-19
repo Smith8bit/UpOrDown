@@ -1,0 +1,32 @@
+name: Update Actual
+
+on:
+  schedule:
+    - cron: '5 22 * * 1-5'  # 10:05pm UTC = 5:05pm ET
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install yfinance ta pandas pandas_market_calendars
+
+      - name: Update actual
+        run: python update_actual.py
+
+      - name: Commit updated results.csv
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add results.csv
+          git diff --staged --quiet || git commit -m "actual: $(date +'%Y-%m-%d')"
+          git push
