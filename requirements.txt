@@ -4,5 +4,4 @@ torch
 yfinance
 ta
 pandas_market_calendars
-streamlit-components
 pytz
