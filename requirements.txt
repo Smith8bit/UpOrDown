@@ -1,0 +1,7 @@
+streamlit
+pandas
+torch
+yfinance
+ta
+pandas_market_calendars
+streamlit-components
