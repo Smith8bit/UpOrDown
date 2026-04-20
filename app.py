@@ -16,6 +16,10 @@ st.markdown("""
         footer {
             visibility: hidden;
         }
+        .stApp a:first-child {
+            display: none;
+        /* disable title link on markdown */
+}
     </style>
 """, unsafe_allow_html=True)
 
