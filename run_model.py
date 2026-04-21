@@ -11,27 +11,37 @@ class StockModel(nn.Module):
     def __init__(self, input_dim, embed_dim, dropout):
         super().__init__()
         self.input_proj = nn.Linear(input_dim, embed_dim)
-        self.LSTM = nn.LSTM(embed_dim, embed_dim, 2, batch_first=True, bidirectional=False)
+        self.LSTM = nn.LSTM(
+            embed_dim, embed_dim, 2, batch_first=True, bidirectional=False, dropout=dropout
+        )
         self.batch_norm = nn.BatchNorm1d(embed_dim)
         self.norm = nn.LayerNorm(embed_dim)
+        self.norm2 = nn.LayerNorm(embed_dim)
         self.dropout = nn.Dropout(dropout)
+
+        self.ffn = nn.Sequential(
+            nn.Linear(embed_dim, embed_dim),
+            nn.ReLU(),
+            nn.Linear(embed_dim, embed_dim),
+        )
         self.out = nn.Sequential(
-            nn.Linear(embed_dim, embed_dim),
-            nn.ReLU(),
-            nn.Linear(embed_dim, embed_dim),
-            nn.ReLU(),
             nn.Linear(embed_dim, 2),
             nn.Softmax(dim=-1)
         )
 
     def forward(self, x):
-        x = self.input_proj(x)
+        x = self.input_proj(x) # (batch, seq, dim)
         x, (h, c) = self.LSTM(x)
-        h = h[1:].squeeze(0)
-        h = self.batch_norm(h)
+        # h: (2, batch, dim)
+        h = h[-1] # (batch, dim)
+        h = self.batch_norm(h) # (batch, dim)
         h = self.norm(h)
         h = self.dropout(h)
-        return self.out(h)
+
+        h = self.norm2(self.ffn(h) + h)
+        out = self.out(h)
+
+        return out
 
 # ── 2. check if today is a trading day ────────────────
 nyse = mcal.get_calendar("NYSE")
@@ -84,6 +94,9 @@ high, low, close, volume = df["High"], df["Low"], df["Close"], df["Volume"]
 
 # Returns
 df["Return"]       = df["Close"].pct_change()
+df['Return_5d']  = df['Close'].pct_change(5) 
+df['Return_10d'] = df['Close'].pct_change(10)  
+df['Return_20d'] = df['Close'].pct_change(20)
 df["PerOpen"]      = df["Open"].pct_change()
 df["PerHigh"]      = df["High"].pct_change()
 df["PerLow"]       = df["Low"].pct_change()
