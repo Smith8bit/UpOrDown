@@ -179,7 +179,7 @@ input_tensor = features_norm[-SEQUENCE_LENGTH:].unsqueeze(0)  # (1, 60, 38)
 print(f"Input shape: {input_tensor.shape}")
 
 # ── 9. load model and predict ─────────────────────────
-model = StockModel(input_dim=38, embed_dim=256, dropout=0.25)
+model = StockModel(input_dim=41, embed_dim=256, dropout=0.25)
 model.load_state_dict(torch.load("LSTM.pth", map_location="cpu", weights_only=True))
 model.eval()
 
