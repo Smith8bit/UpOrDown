@@ -29,7 +29,7 @@ df["date"] = pd.to_datetime(df["date"])
 latest = df.iloc[-1]
 
 # ── next market day ───────────────────────────────────
-ny_tz = pytz.timezone('US/Eastern')
+ny_tz = pytz.timezone('Asia/Bangkok')
 today_ny = datetime.now(ny_tz).date()
 
 nyse = mcal.get_calendar("NYSE")
